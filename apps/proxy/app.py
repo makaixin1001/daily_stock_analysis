@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import requests
 from flask_cors import CORS
 
@@ -7,7 +7,8 @@ CORS(app)
 
 @app.route('/futures', methods=['GET'])
 def get_futures():
-    url = "https://push2.eastmoney.com/api/qt/clist/get"
+    # 使用东财官方延迟版API（反爬成功率最高）
+    url = "https://push2delay.eastmoney.com/api/qt/clist/get"
     params = {
         "np": "1",
         "fltt": "2",
@@ -17,9 +18,17 @@ def get_futures():
         "ut": "bd1d9ddb040897e8b1a2a5c0a5a2f5d4",
     }
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-        "Referer": "https://quote.eastmoney.com/",
-        "Origin": "https://quote.eastmoney.com"
+        "Host": "push2delay.eastmoney.com",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": "https://quote.eastmoney.com/center/gridlist.html",
+        "Origin": "https://quote.eastmoney.com",
+        "Connection": "keep-alive",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
     }
     
     try:
@@ -28,7 +37,7 @@ def get_futures():
         data = resp.json()
         return jsonify(data)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "status": "proxy_failed"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
